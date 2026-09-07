@@ -1,4 +1,6 @@
-s totient function and the extended Euclidean algorithm), textbook encryption/decryption routines, digital signing/verifying functions, and a secure RSA Blinding variant developed to defeat timing attacks as outlined on Wikipedia. 
+# Ada 2023 RSA Cryptosystem
+
+Project Overview: This is a robust, complete implementation of the RSA cryptosystem utilizing Ada 2023's `Ada.Numerics.Big_Numbers.Big_Integers` package. It implements mathematical prime-based generation, safe key extraction (using Carmichael's totient function and the extended Euclidean algorithm), textbook encryption/decryption routines, digital signing/verifying functions, and a secure RSA Blinding variant developed to defeat timing attacks as outlined on Wikipedia. 
 
 Features:
 * Complete "Textbook RSA" End-to-End: Implements strict key generation, robust encryption, precise decryption, and secure signing/verification methodologies.
@@ -8,9 +10,7 @@ Features:
 
 Usage:
 Compile and execute the bundled test suite which demonstrates end-to-end functionality acting as the main run sequence. 
-Expect clean output detailing checks across bounds: 
-make test
-
+Expect clean output detailing checks across bounds:
 Expected output summarizes passing assertions (e.g., `PASS — 8.1 Encryption matches Wikipedia exact example` ... `=== 40 passed, 0 failed ===`). 
 
 Testing:
