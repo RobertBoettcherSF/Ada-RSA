@@ -60,9 +60,11 @@ begin
       Failed : Boolean := False;
    begin
       begin
+         pragma Warnings (Off, "if statement has no effect");
          if Modular_Inverse (To_RSA(2), To_RSA(4)) = Zero then
             null;
          end if;
+         pragma Warnings (On, "if statement has no effect");
       exception
          when RSA.Math_Error | Ada.Assertions.Assertion_Error => Failed := True;
       end;
@@ -72,10 +74,11 @@ begin
    -- TEST 6: Key Generation (Wikipedia Example)
    Put_Line ("TEST 6 — Key Generation (Wikipedia Example)");
    declare
-      Keys : Key_Pair := Generate_Key_Pair (To_RSA(61), To_RSA(53), To_RSA(17));
+      Keys : constant Key_Pair := Generate_Key_Pair (To_RSA(61), To_RSA(53), To_RSA(17));
    begin
       Check ("6.1 N = P*Q calculation", Keys.Pub.N = To_RSA(3233));
-      Check ("6.2 D modular inverse correct", Keys.Priv.D = To_RSA(2753));
+      -- Generating keys via LCM (Carmichael) produces D = 413, conforming to PKCS#1 and Wikipedia's core example.
+      Check ("6.2 D modular inverse correct", Keys.Priv.D = To_RSA(413));
       Check ("6.3 N matches across Pub and Priv", Keys.Priv.N = Keys.Pub.N);
    end;
 
@@ -88,7 +91,9 @@ begin
       begin
          -- P=5, Q=7 => Lambda=LCM(4,6)=12. E=6 is not coprime to 12.
          Keys := Generate_Key_Pair (To_RSA(5), To_RSA(7), To_RSA(6));
+         pragma Warnings (Off, "if statement has no effect");
          if Keys.Pub.N = Zero then null; end if;
+         pragma Warnings (On, "if statement has no effect");
       exception
          when RSA.Invalid_Key_Error | Ada.Assertions.Assertion_Error => Failed := True;
       end;
@@ -100,8 +105,8 @@ begin
    -- TEST 8: Encryption and Decryption Core (Textbook)
    Put_Line ("TEST 8 — Encryption and Decryption");
    declare
-      Keys  : Key_Pair := Generate_Key_Pair (To_RSA(61), To_RSA(53), To_RSA(17));
-      M     : RSA_Integer := To_RSA (65);
+      Keys  : constant Key_Pair := Generate_Key_Pair (To_RSA(61), To_RSA(53), To_RSA(17));
+      M     : constant RSA_Integer := To_RSA (65);
       C     : RSA_Integer;
       M_Dec : RSA_Integer;
    begin
@@ -115,8 +120,8 @@ begin
    -- TEST 9: Sign and Verify Message Variants
    Put_Line ("TEST 9 — Signature Generation and Verification");
    declare
-      Keys : Key_Pair := Generate_Key_Pair (To_RSA(61), To_RSA(53), To_RSA(17));
-      Msg  : RSA_Integer := To_RSA (89);
+      Keys : constant Key_Pair := Generate_Key_Pair (To_RSA(61), To_RSA(53), To_RSA(17));
+      Msg  : constant RSA_Integer := To_RSA (89);
       Sig  : RSA_Integer;
    begin
       Sig := Sign (Msg, Keys.Priv);
@@ -128,26 +133,32 @@ begin
    -- TEST 10: Boundary Validation & Message Size Limits
    Put_Line ("TEST 10 — Message Size Limits");
    declare
-      Keys : Key_Pair := Generate_Key_Pair (To_RSA(5), To_RSA(7), To_RSA(5));
+      Keys : constant Key_Pair := Generate_Key_Pair (To_RSA(5), To_RSA(7), To_RSA(5));
       -- N = 35 for this key pair
       Failed_Enc, Failed_Dec, Failed_Sign : Boolean := False;
    begin
       begin
+         pragma Warnings (Off, "if statement has no effect");
          if Encrypt (To_RSA(35), Keys.Pub) = Zero then null; end if;
+         pragma Warnings (On, "if statement has no effect");
       exception
          when RSA.Message_Too_Large_Error | Ada.Assertions.Assertion_Error => Failed_Enc := True;
       end;
       Check ("10.1 Encrypt >= N strictly fails", Failed_Enc);
 
       begin
+         pragma Warnings (Off, "if statement has no effect");
          if Decrypt (To_RSA(40), Keys.Priv) = Zero then null; end if;
+         pragma Warnings (On, "if statement has no effect");
       exception
          when RSA.Message_Too_Large_Error | Ada.Assertions.Assertion_Error => Failed_Dec := True;
       end;
       Check ("10.2 Decrypt >= N strictly fails", Failed_Dec);
 
       begin
+         pragma Warnings (Off, "if statement has no effect");
          if Sign (To_RSA(35), Keys.Priv) = Zero then null; end if;
+         pragma Warnings (On, "if statement has no effect");
       exception
          when RSA.Message_Too_Large_Error | Ada.Assertions.Assertion_Error => Failed_Sign := True;
       end;
@@ -157,9 +168,9 @@ begin
    -- TEST 11: RSA Blinding Variant (Mitigates Timing Attacks)
    Put_Line ("TEST 11 — RSA Blinding");
    declare
-      Keys  : Key_Pair := Generate_Key_Pair (To_RSA(61), To_RSA(53), To_RSA(17));
-      M     : RSA_Integer := To_RSA (42);
-      C     : RSA_Integer := Encrypt (M, Keys.Pub);
+      Keys  : constant Key_Pair := Generate_Key_Pair (To_RSA(61), To_RSA(53), To_RSA(17));
+      M     : constant RSA_Integer := To_RSA (42);
+      C     : constant RSA_Integer := Encrypt (M, Keys.Pub);
       M_Dec : RSA_Integer;
    begin
       M_Dec := Decrypt_Blinded (C, Keys.Priv, Keys.Pub.E, To_RSA(2));
@@ -175,7 +186,7 @@ begin
    -- TEST 12: Fixed Points and Edge Cases in RSA
    Put_Line ("TEST 12 — Fixed Points and Edge Cases");
    declare
-      Keys : Key_Pair := Generate_Key_Pair (To_RSA(61), To_RSA(53), To_RSA(17));
+      Keys : constant Key_Pair := Generate_Key_Pair (To_RSA(61), To_RSA(53), To_RSA(17));
    begin
       -- 0, 1, and N-1 are known unpreventable fixed points in textbook RSA (M^e mod N = M)
       Check ("12.1 M=0 is mathematically a fixed point", Encrypt (Zero, Keys.Pub) = Zero);
@@ -188,11 +199,11 @@ begin
    declare
       -- Pick larger valid primes that stay comfortably within standard fast testing ranges
       -- but exceed simple standard type layouts implicitly if not handled via Big_Integer
-      P : RSA_Integer := To_RSA (1009);
-      Q : RSA_Integer := To_RSA (1013);
-      E : RSA_Integer := To_RSA (17);
+      P : constant RSA_Integer := To_RSA (1009);
+      Q : constant RSA_Integer := To_RSA (1013);
+      E : constant RSA_Integer := To_RSA (17);
       Keys : Key_Pair;
-      M : RSA_Integer := To_RSA (1_000_000);
+      M : constant RSA_Integer := To_RSA (1_000_000);
       C : RSA_Integer;
    begin
       Keys := Generate_Key_Pair (P, Q, E);
