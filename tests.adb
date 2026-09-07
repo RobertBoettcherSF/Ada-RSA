@@ -1,5 +1,7 @@
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Assertions;
+with Ada.Numerics.Big_Numbers.Big_Integers;
+use type Ada.Numerics.Big_Numbers.Big_Integers.Big_Integer;
 with RSA; use RSA;
 
 procedure Tests is
