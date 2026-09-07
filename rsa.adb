@@ -132,15 +132,15 @@ package body RSA is
 
    function Decrypt_Blinded (Ciphertext : RSA_Integer; Key : Private_Key; Pub_E : RSA_Integer; R : RSA_Integer) return RSA_Integer is
       -- Factor r^e mod N
-      R_E       : RSA_Integer := Modular_Exponentiation (R, Pub_E, Key.N);
+      R_E       : constant RSA_Integer := Modular_Exponentiation (R, Pub_E, Key.N);
       -- Blinded ciphertext: (C * r^e) mod N
-      C_Blinded : RSA_Integer := (Ciphertext * R_E) mod Key.N;
+      C_Blinded : constant RSA_Integer := (Ciphertext * R_E) mod Key.N;
       -- Perform standard exponentiation on blinded value: (C_Blinded)^d mod N
-      M_Blinded : RSA_Integer := Modular_Exponentiation (C_Blinded, Key.D, Key.N);
+      M_Blinded : constant RSA_Integer := Modular_Exponentiation (C_Blinded, Key.D, Key.N);
       -- Factor r^-1 mod N
-      R_Inv     : RSA_Integer := Modular_Inverse (R, Key.N);
+      R_Inv     : constant RSA_Integer := Modular_Inverse (R, Key.N);
       -- Unblind the result
-      M         : RSA_Integer := (M_Blinded * R_Inv) mod Key.N;
+      M         : constant RSA_Integer := (M_Blinded * R_Inv) mod Key.N;
    begin
       return M;
    end Decrypt_Blinded;
